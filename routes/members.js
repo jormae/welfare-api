@@ -165,15 +165,16 @@ router.put("/:nationalId", async (req, res) => {
    memberTypeId,
    memberRoleId,
    memberStatusId,
+   isHealthInsurance,
    resignDate } = req.body;
    const nationalId = req.params.nationalId
   try {
     connection.query(
       "UPDATE tbl_member SET memberName = ?, houseNo = ?, streetName = ?, villageName = ?, villageNo = ?, subDistrict = ?, "+
       "district = ?, province = ?, postCode = ?, contactNo = ?, positionId = ?, salary = ?, paymentTypeId = ?, memberTypeId = ?, "+
-      "memberRoleId = ?, memberStatusId = ?, resignDate = ? WHERE nationalId = ? ",
+      "memberRoleId = ?, memberStatusId = ?,  isHealthInsurance = ?, resignDate = ? WHERE nationalId = ? ",
       [memberName, houseNo, streetName, villageName, villageNo, subDistrict, district, province,postCode, contactNo, positionId,
-        salary, paymentTypeId,memberTypeId, memberRoleId, memberStatusId, resignDate, nationalId],
+        salary, paymentTypeId,memberTypeId, memberRoleId, memberStatusId, isHealthInsurance, resignDate, nationalId],
       (err, results, fields) => {
         if (err) {
           console.log("Error while updating a member in database!", err);
