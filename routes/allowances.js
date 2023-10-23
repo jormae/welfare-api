@@ -92,7 +92,7 @@ router.delete("/:allowanceId", async (req, res) => {
         }
         return res
           .status(200)
-          .json({ status:"success", message: "The allowance is successfully deleted!" });
+          .json({ status:"success", message: "ลบข้อมูลรายการสวัสดิการเรียบร้อยแล้ว!" });
       }
     );
   } catch (err) {

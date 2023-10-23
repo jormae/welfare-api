@@ -192,10 +192,10 @@ router.get("/yearly/welfare/summary/:year", (req, res) => {
     console.log('year = '+year)
     try {
       const mysql =
-        "SELECT SUM(paymentAmount) AS TOTAL_PAYMENT, SUBSTR(loanPaymentMonth, 1, 7) AS loanPaymentMonth "+
+        "SELECT SUM(paymentAmount) AS TOTAL_PAYMENT, DATE_FORMAT(loanPaymentMonth, '%Y-%m') AS loanPaymentMonth "+
         "FROM tbl_loan_payment "+
         "WHERE loanPaymentMonth LIKE ? "+
-        "GROUP BY loanPaymentMonth";
+        "GROUP BY DATE_FORMAT(loanPaymentMonth, '%Y%m')";
       connection.query(mysql, [year], (err, results, fields) => {
         if (err) {
           console.log(err);

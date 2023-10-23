@@ -91,7 +91,7 @@ router.delete("/:goldId", async (req, res) => {
         }
         return res
           .status(200)
-          .json({ message: "The gold is successfully deleted!" });
+          .json({ status:"success", message: "ลบข้อมูลรายการทองเรียบร้อยแล้ว!" });
       }
     );
   } catch (err) {

@@ -17,7 +17,7 @@ router.get("/", (req, res) => {
       "SELECT * "+
       "FROM tbl_zakat z "+
       "LEFT JOIN tbl_zakat_type zt ON zt.zakatTypeId = z.zakatTypeId "
-      "ORDER BY zakatDateTime DESC";
+      "ORDER BY zakatId DESC";
     connection.query(mysql, (err, results, fields) => {
       if (err) {
         console.log(err);
@@ -91,8 +91,8 @@ router.delete("/:zakatId", async (req, res) => {
           return res.status(400).send();
         }
         return res
-          .status(200)
-          .json({ message: "The zakat is successfully deleted!" });
+        .status(200)
+        .json({ status:"success", message: "ลบข้อมูลรายการซากาตเรียบร้อยแล้ว!" });
       }
     );
   } catch (err) {

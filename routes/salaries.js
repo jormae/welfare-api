@@ -80,8 +80,8 @@ router.get("/date/:date", async (req, res) => {
       "LEFT JOIN tbl_position p ON p.positionId = m.positionId "+
       // "LEFT JOIN tbl_salary s ON s.nationalId = m.nationalId "+
       "WHERE m.memberStatusId = 1 "+
-      "AND m.paymentTypeId = 2 "+
-      // "AND isHealthInsurance = 1 "+
+      // "AND m.paymentTypeId = 2 "+
+      "AND isHealthInsurance = 1 "+
       // "AND salaryMonth = ? "+
       "ORDER BY memberName ASC",
       // [date],
@@ -165,14 +165,9 @@ router.post(
       connection.query(
         "SELECT * "+
       "FROM tbl_member m "+
-      "LEFT JOIN tbl_member_role mr ON mr.memberRoleId = m.memberRoleId "+
-      "LEFT JOIN tbl_member_type mt ON mt.memberTypeId = m.memberTypeId "+
-      "LEFT JOIN tbl_payment_type pt ON pt.paymentTypeId = m.paymentTypeId "+
-      "LEFT JOIN tbl_position p ON p.positionId = m.positionId "+
       "WHERE m.memberStatusId = 1 "+
       "AND m.paymentTypeId = 2 "+
-      // "AND isHealthInsurance = 1 "+
-      // "AND salaryMonth = ? "+
+      "AND isHealthInsurance = 1 "+
       "ORDER BY memberName ASC ",
         (err, results, fields) => {
           if (err) {
