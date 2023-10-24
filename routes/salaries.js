@@ -72,19 +72,13 @@ router.get("/date/:date", async (req, res) => {
 //   const healthInsurance = req.params.healthInsurance;
   try {
     connection.query(
-      "SELECT * "+
+      "SELECT *, "+
+      "(SELECT (houseRent+bank+studentLoan+allowance) FROM tbl_debt d WHERE d.nationalId = m.nationalId AND d.yearMonth = ? ) AS debts "+
       "FROM tbl_member m "+
-      "LEFT JOIN tbl_member_role mr ON mr.memberRoleId = m.memberRoleId "+
-      "LEFT JOIN tbl_member_type mt ON mt.memberTypeId = m.memberTypeId "+
-      "LEFT JOIN tbl_payment_type pt ON pt.paymentTypeId = m.paymentTypeId "+
-      "LEFT JOIN tbl_position p ON p.positionId = m.positionId "+
-      // "LEFT JOIN tbl_salary s ON s.nationalId = m.nationalId "+
       "WHERE m.memberStatusId = 1 "+
-      // "AND m.paymentTypeId = 2 "+
-      "AND isHealthInsurance = 1 "+
-      // "AND salaryMonth = ? "+
+      "AND m.isHealthInsurance = 1 "+
       "ORDER BY memberName ASC",
-      // [date],
+      [date],
       (err, results, fields) => {
         if (err) {
           console.log(err);
@@ -151,7 +145,7 @@ router.post(
   async (req, res) => {
     const {date,
       healthInsurance,
-      username} = req.body;
+      memberName} = req.body;
       console.log(req.body);
   const datetime =  moment().format('YYYY-MM-DD H:m:s');
 
@@ -163,22 +157,22 @@ router.post(
     }
     try {
       connection.query(
-        "SELECT * "+
-      "FROM tbl_member m "+
-      "WHERE m.memberStatusId = 1 "+
-      "AND m.paymentTypeId = 2 "+
-      "AND isHealthInsurance = 1 "+
-      "ORDER BY memberName ASC ",
+        "SELECT *, "+
+        "(SELECT (houseRent+bank+studentLoan+allowance) FROM tbl_debt d WHERE d.nationalId = m.nationalId AND d.yearMonth = ? ) AS debts "+
+        "FROM tbl_member m "+
+        "WHERE m.memberStatusId = 1 "+
+        "AND m.isHealthInsurance = 1 ", date,
         (err, results, fields) => {
           if (err) {
             console.log("บันทึกข้อมูลเงินเดือนล้มเหลว", err);
             return res.status(400).send();
           }
           for(i=0; i<results.length; i++){
-          
-            connection.query("INSERT INTO tbl_salary (salaryMonth, nationalId, basedSalary, healthInsurancePercentage, healthInsurance, netSalary) VALUES (?, ?, ?, ?, ?, ?)", 
-            [date, results[i]['nationalId'], results[i]['salary'], healthInsurance, (healthInsurance * results[i]['salary']), results[i]['salary'] - (healthInsurance * results[i]['salary'])]);
-
+            let paramSalary = results[i]['salary'] > 15000 ? 15000 : results[i]['salary'];
+            let paramHealthInsurance = healthInsurance * paramSalary;
+            let netSalary = results[i]['salary'] - results[i]['debts'] - paramHealthInsurance;
+            connection.query("INSERT INTO tbl_salary (salaryMonth, nationalId, basedSalary, healthInsurancePercentage, healthInsurance, debts, netSalary, createdAt, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+            [date, results[i]['nationalId'], results[i]['salary'], healthInsurance, paramHealthInsurance, results[i]['debts'], netSalary, datetime, memberName]);
           }
 
           return res

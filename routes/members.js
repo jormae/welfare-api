@@ -109,6 +109,7 @@ router.post(
       shareQuantity, 
       valuePerShare, 
       totalShare,
+      isHealthInsurance,
       username} = req.body;
   const datetime =  moment().format('YYYY-MM-DD H:m:s');
 
@@ -122,10 +123,10 @@ router.post(
       connection.query(
         "INSERT INTO tbl_member(memberName, houseNo, streetName, villageName, villageNo, "+
         "subDistrict, district, province,postCode, contactNo, positionId, "+
-        "salary, paymentTypeId,memberTypeId, memberRoleId, memberStatusId, nationalId) "+
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "salary, paymentTypeId,memberTypeId, memberRoleId, memberStatusId, isHealthInsurance, nationalId) "+
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [memberName, houseNo, streetName, villageName, villageNo, subDistrict, district, province,postCode, contactNo, positionId,
-          salary, paymentTypeId,memberTypeId, memberRoleId, memberStatusId, nationalId],
+          salary, paymentTypeId,memberTypeId, memberRoleId, memberStatusId, isHealthInsurance, nationalId],
         (err, results, fields) => {
           if (err) {
             console.log("Error while inserting a member into database!", err);
