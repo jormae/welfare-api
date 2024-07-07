@@ -88,9 +88,9 @@ router.get("/monthly/welfare/pending-payment/:date", (req, res) => {
     console.log(date)
     try {
       const mysql =
-     " SELECT approvedAt, memberName, positionName, memberTypeName, loanTypeName, loanAmount, loanStatusName, loanDurationInMonth, monthlyPayment, (loanAmount - (if(loanBalance IS NOT NULL, loanBalance, 0))) AS loanBalance, loanId, nationalId, startLoanDate, endLoanDate, (if(monthNo IS NOT NULL, monthNo, 0)+1) AS monthNo "+
+     " SELECT approvedAt, memberName, positionName, memberTypeName, loanTypeName, loanAmount, loanStatusName, loanDurationInMonth, monthlyPayment, ((loanAmount + totalProfit) - (if(loanBalance IS NOT NULL, loanBalance, 0))) AS loanBalance, loanId, nationalId, startLoanDate, endLoanDate, (if(monthNo IS NOT NULL, monthNo, 0)+1) AS monthNo "+
      "FROM  "+
-     "(SELECT l.approvedAt, memberName, positionName, memberTypeName, loanTypeName, loanAmount, loanStatusName, loanDurationInMonth, monthlyPayment, l.loanId, l.nationalId, startLoanDate, endLoanDate, (SELECT SUM(paymentAmount) FROM tbl_loan_payment lp WHERE lp.loanId = l.loanId) AS loanBalance, (SELECT MAX(monthNo) FROM tbl_loan_payment lp1 WHERE lp1.loanId = l.loanId) AS monthNo "+      
+     "(SELECT l.approvedAt, memberName, positionName, memberTypeName, loanTypeName, loanAmount, loanStatusName, loanDurationInMonth, monthlyPayment, l.loanId, l.nationalId, startLoanDate, endLoanDate, (SELECT SUM(paymentAmount) FROM tbl_loan_payment lp WHERE lp.loanId = l.loanId) AS loanBalance, (SELECT MAX(monthNo) FROM tbl_loan_payment lp1 WHERE lp1.loanId = l.loanId) AS monthNo, totalProfit "+      
      "FROM tbl_loan l   "+
      "LEFT JOIN tbl_member m ON m.nationalId = l.nationalId   "+
      "LEFT JOIN tbl_loan_type lt ON lt.loanTypeId = l.loanTypeId   "+
@@ -103,6 +103,7 @@ router.get("/monthly/welfare/pending-payment/:date", (req, res) => {
      "( SELECT loanId FROM tbl_loan_payment WHERE loanPaymentMonth LIKE ?)  "+
      "GROUP BY l.loanId  "+
      ") AS x  "+
+     "HAVING loanBalance > 0 "+
      "ORDER BY loanTypeName, loanAmount, memberName";
       connection.query(mysql, [date], (err, results, fields) => {
         if (err) {

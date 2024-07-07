@@ -99,7 +99,8 @@ router.get("/request/:nationalId/:loanId", (req, res) => {
     ",m1.memberName AS firstReferenceName, m1.contactNo AS firstReferenceContactNo, m2.memberName AS secondReferenceName, m2.contactNo AS secondReferenceContactNo, " +
     "m.memberName AS loanMemberName, s1.spouseName AS firstSpouseName, s1.spouseContactNo AS firstSpouseContactNo, s2.spouseName AS secondSpouseName, s1.spouseContactNo AS secondSpouseContactNo, "+
     "s1.spouseNationalId AS spouseNationalId, s2.spouseNationalId AS secondSpouseNationalId, "+
-    "s.spouseNationalId, s.spouseName, lt.loanTypeName, lt.loanMainTypeId "+
+    "s.spouseNationalId, s.spouseName, lt.loanTypeName, lt.loanMainTypeId, "+
+    "(SELECT SUM(paymentAmount) FROM tbl_loan_payment lp WHERE lp.loanId = l.loanId) AS totalLoanPayment "+
     "FROM tbl_loan l " +
     "LEFT JOIN tbl_member m ON m.nationalId = l.nationalId "+
     "LEFT JOIN tbl_loan_type lt ON lt.loanTypeId = l.loanTypeId "+
@@ -182,7 +183,7 @@ router.get("/payment-history/:nationalId/:loanId", async (req, res) => {
   const loanId = req.params.loanId;
   try {
     connection.query(
-      "SELECT l.loanId, monthNo, loanPaymentMonth, paymentAmount, paymentTypeName, lp.approvedAt, lp.approvedBy, paymentFilePath, isCloseLoanPayment, loanAmount "+
+      "SELECT l.loanId, monthNo, loanPaymentMonth, paymentAmount, paymentTypeName, lp.approvedAt, lp.approvedBy, paymentFilePath, isCloseLoanPayment, loanAmount, monthlyProfit, totalProfit "+
       "FROM tbl_loan_payment lp   "+
       "LEFT JOIN tbl_loan l ON lp.loanId = l.loanId  "+
       "LEFT JOIN tbl_loan_type lt ON lt.loanTypeId = l.loanTypeId "+
@@ -237,15 +238,9 @@ router.get("/payment-suggestion/:loanId", async (req, res) => {
   const loanId = req.params.loanId;
   try {
     connection.query(
-      // "SELECT lp.loanId, DATE_ADD(loanPaymentMonth, INTERVAL 1 MONTH) AS loanPaymentMonth, monthNo + 1 AS monthNo, paymentAmount, lp.paymentTypeId, l.nationalId, memberName, refId "+  
-      // "FROM tbl_loan_payment lp  "+
-      // "LEFT JOIN tbl_loan l ON lp.loanId = l.loanId  "+
-      // "LEFT JOIN tbl_member m ON m.nationalId = l.nationalId "+
-      // "WHERE loanStatusId = 1 "+
-      // "AND l.nationalId = ?",
-      "SELECT loanId, loanTypeName, memberName, nationalId, refId, paymentTypeId, monthlyPayment, IF(monthNo IS NULL, 0, monthNo) + 1 AS monthNo, loanAmount, totalLoanPayment, (loanAmount - IF(totalLoanPayment IS NULL, 0, totalLoanPayment)) AS totalLoanBalance "+
+      "SELECT loanId, loanTypeName, memberName, nationalId, refId, paymentTypeId, monthlyPayment, IF(monthNo IS NULL, 0, monthNo) + 1 AS monthNo, closeLoanInMonth, loanAmount, IF(totalLoanPayment > 0,totalLoanPayment,0) AS totalLoanPayment, ((loanAmount + totalProfit) - IF(totalLoanPayment IS NULL, 0, totalLoanPayment)) AS totalLoanBalance, monthlyProfit, totalProfit "+
       "FROM  "+
-      "(SELECT l.loanId, loanTypeName, memberName, m.nationalId, refId, paymentTypeId, monthlyPayment, loanAmount,  "+
+      "(SELECT l.loanId, loanTypeName, memberName, m.nationalId, refId, paymentTypeId, monthlyPayment, loanAmount, monthlyProfit, totalProfit, closeLoanInMonth, "+
       "(SELECT MAX(monthNo) FROM tbl_loan_payment lp WHERE lp.loanId = l.loanId) AS monthNo,  "+
       "(SELECT SUM(paymentAmount) FROM tbl_loan_payment lp WHERE lp.loanId = l.loanId) AS totalLoanPayment "+
       "FROM tbl_loan l  "+
@@ -277,9 +272,9 @@ router.get("/pending-payment/:yearmonth", (req, res) => {
 
   try {
     const mysql =
-    "SELECT memberName, positionName, loanTypeName, loanAmount, nationalId "+
+    "SELECT memberName, positionName, loanTypeName, (loanAmount + totalProfit) AS loanAmount, nationalId "+
     "FROM "+
-    "(SELECT memberName, positionName, loanTypeName, loanAmount, l.nationalId  "+
+    "(SELECT memberName, positionName, loanTypeName, loanAmount, totalProfit, l.nationalId  "+
     "FROM tbl_loan l  "+
     "LEFT JOIN tbl_member m ON m.nationalId = l.nationalId  "+
     "LEFT JOIN tbl_loan_type lt ON lt.loanTypeId = l.loanTypeId  "+
@@ -295,7 +290,7 @@ router.get("/pending-payment/:yearmonth", (req, res) => {
     "(IF(houseRental IS NOT NULL, houseRental, 0)  +  "+
     "IF(bankLoan IS NOT NULL, bankLoan, 0)  +  "+
     "IF(studyLoan IS NOT NULL, studyLoan, 0)  +  "+
-    "IF(allowanceLoan IS NOT NULL, allowanceLoan, 0) ) AS loanAmount, nationalId "+
+    "IF(allowanceLoan IS NOT NULL, allowanceLoan, 0) ) AS loanAmount, '' AS totalProfit, nationalId "+
     "FROM tbl_member m  "+
     "LEFT JOIN tbl_position p ON p.positionId = m.positionId  "+
     "WHERE isOtherLoan = 1 "+

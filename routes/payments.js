@@ -85,11 +85,11 @@ body("loanId","loanPaymentMonth").custom((value, { req }) => {
   });
 }),
 async (req, res) => {
-    const { nationalId, loanId, loanPaymentMonth, monthNo, paymentAmount, paymentTypeId, userName, memberRoleId, slip, totalLoanBalance } = req.body;
+    const { nationalId, loanId, loanPaymentMonth, monthNo, paymentAmount, paymentTypeId, userName, memberRoleId, slip, totalLoanBalance, isCloseLoanPayment } = req.body;
     const datetime =  moment().format('YYYY-MM-DD H:m:s');
     const approvedAt = (memberRoleId != 4) ? datetime : null
     const approvedBy = (memberRoleId != 4) ? userName : null
-    const isCloseLoanPayment = (totalLoanBalance == paymentAmount) ? 1 : null
+    // const isCloseLoanPayment = (totalLoanBalance == paymentAmount) ? 1 : null
     // const slip = req.body.slip;
     // console.log('slip = '+slip)
     const paymentFilePath =  req.paymentFilePath;
@@ -112,7 +112,7 @@ async (req, res) => {
             console.log("Error :: บันทึกข้อมูลการชำระเงินสวัสดิการล้มเหลว!", err);
             return res.status(400).send();
           }
-          if(totalLoanBalance == paymentAmount){
+          if(isCloseLoanPayment == 1){
             connection.query("UPDATE tbl_loan SET closeLoanStatusId = 3 WHERE loanId = ?", loanId);
           }
           return res

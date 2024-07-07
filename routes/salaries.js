@@ -73,7 +73,7 @@ router.get("/date/:date", async (req, res) => {
   try {
     connection.query(
       "SELECT *, "+
-      "(SELECT (houseRent+bank+studentLoan+allowance) FROM tbl_debt d WHERE d.nationalId = m.nationalId AND d.yearMonth = ? ) AS debts "+
+      "(SELECT ROUND((houseRent+bank+studentLoan+allowance),2) FROM tbl_debt d WHERE d.nationalId = m.nationalId AND d.yearMonth = ? ) AS debts "+
       "FROM tbl_member m "+
       "WHERE m.memberStatusId = 1 "+
       "AND m.isHealthInsurance = 1 "+
@@ -158,7 +158,7 @@ router.post(
     try {
       connection.query(
         "SELECT *, "+
-        "(SELECT (houseRent+bank+studentLoan+allowance) FROM tbl_debt d WHERE d.nationalId = m.nationalId AND d.yearMonth = ? ) AS debts "+
+        "(SELECT ROUND((houseRent+bank+studentLoan+allowance),2) FROM tbl_debt d WHERE d.nationalId = m.nationalId AND d.yearMonth = ? ) AS debts "+
         "FROM tbl_member m "+
         "WHERE m.memberStatusId = 1 "+
         "AND m.isHealthInsurance = 1 ", date,

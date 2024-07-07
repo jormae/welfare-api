@@ -51,6 +51,101 @@ router.get("/date/:yearMonth", (req, res) => {
   }
 });
 
+router.get("/bank/:yearMonth", (req, res) => {
+  const yearMonth = req.params.yearMonth
+  const yearMonthDate = req.params.yearMonth + "-01"
+  try {
+    const mysql =
+        "SELECT m.nationalId, yearMonth, bank, memberName "+
+        "FROM tbl_debt d "+
+        "LEFT JOIN tbl_member m ON m.nationalId = d.nationalId "+
+        "WHERE bank > 0 "+
+        "AND yearMonth = ? "+
+        "ORDER BY memberName";
+    connection.query(mysql, [yearMonth], (err, results, fields) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send();
+      }
+      res.status(200).json(results);
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send();
+  }
+});
+
+router.get("/allowance/:yearMonth", (req, res) => {
+  const yearMonth = req.params.yearMonth
+  const yearMonthDate = req.params.yearMonth + "-01"
+  try {
+    const mysql =
+        "SELECT  m.nationalId, yearMonth, allowance, memberName "+
+        "FROM tbl_debt d "+
+        "LEFT JOIN tbl_member m ON m.nationalId = d.nationalId "+
+        "WHERE allowance > 0 "+
+        "AND yearMonth = ? "+
+        "ORDER BY memberName";
+    connection.query(mysql, [yearMonth], (err, results, fields) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send();
+      }
+      res.status(200).json(results);
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send();
+  }
+});
+
+router.get("/student-loan/:yearMonth", (req, res) => {
+  const yearMonth = req.params.yearMonth
+  const yearMonthDate = req.params.yearMonth + "-01"
+  try {
+    const mysql =
+        "SELECT  m.nationalId, yearMonth, studentLoan, memberName "+
+        "FROM tbl_debt d "+
+        "LEFT JOIN tbl_member m ON m.nationalId = d.nationalId "+
+        "WHERE studentLoan > 0 "+
+        "AND yearMonth = ? "+
+        "ORDER BY memberName";
+    connection.query(mysql, [yearMonth], (err, results, fields) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send();
+      }
+      res.status(200).json(results);
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send();
+  }
+});
+
+router.get("/house-rent/:yearMonth", (req, res) => {
+  const yearMonth = req.params.yearMonth
+  try {
+    const mysql =
+        "SELECT  m.nationalId, yearMonth, houseRent, memberName "+
+        "FROM tbl_debt d "+
+        "LEFT JOIN tbl_member m ON m.nationalId = d.nationalId "+
+        "WHERE houseRent > 0 "+
+        "AND yearMonth = ? "+
+        "ORDER BY memberName";
+    connection.query(mysql, [yearMonth], (err, results, fields) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send();
+      }
+      res.status(200).json(results);
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send();
+  }
+});
+
 router.get("/sum/:yearMonth", (req, res) => {
     const yearMonth = req.params.yearMonth
   try {
